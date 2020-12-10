@@ -1,8 +1,6 @@
 #AMM GOVERNANCE CONTRACT v0.1.2 WITH INTEGRATED TOKEN
 #No tests have been run, so do not deploy this in production at this time
 #This code has not been audited. Proceed at your own risk
-
-import amm_token
 sig = Hash(default_value=False)
 proposal_details = Hash()
 number_of_sig = Variable()
@@ -119,7 +117,7 @@ def change_approval_percentage(new_percentage: float, description: str, voting_t
     proposal_details[p_id, "duration"] = voting_time_in_days
     return p_id
 @export
-def create_signalling_vote(action: int, description: str, voting_time_in_days: int):
+def create_signalling_vote(action: str, description: str, voting_time_in_days: int):
     assert voting_time_in_days >= minimum_proposal_duration.get()
     assert new_minimum_amount <= 365
     p_id = proposal_id.get()
@@ -174,7 +172,7 @@ def sign_custom_transaction(contract: str, function: str, kwargs: dict, descript
 @export
 def create_mint_proposal(amount: float, to: str, description: str, voting_time_in_days: int): #Mint tokens. Warning: Dangerous, and can lead to the takeover of the SC
     assert voting_time_in_days >= minimum_proposal_duration.get()
-    assert voting_time_in_days > 7, "Minting has a set minimum length of 7 days"
+    assert voting_time_in_days > 0, "Minting has a set minimum length of 7 days" #Set hardcoded minimum duration here
     assert amount > 0
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
