@@ -214,6 +214,7 @@ def proposal_result(): #Get proposal result bool here
 @export 
 def proposal_information(p_id: int): #Get proposal information, provided as a dictionary
     info =	{
+        "action": proposal_details[p_id, "action"],
         "state": proposal_details[p_id, "state"],
         "key": proposal_details[p_id, "key"],
         "token_contract": proposal_details[p_id, "token_contract"],
