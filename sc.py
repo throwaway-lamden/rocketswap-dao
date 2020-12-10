@@ -32,11 +32,8 @@ def create_transfer_proposal(token_contract: str, amount: float, to: str, descri
     proposal_details[p_id, "token_contract"] = token_contract
     proposal_details[p_id, "amount"] = amount
     proposal_details[p_id, "reciever"] = to
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "transfer"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def create_approval_proposal(token_contract: str, amount: float, to: str, description: str, voting_time_in_days: int): #Approve the transfer of tokens held by the AMM treasury here
@@ -46,11 +43,8 @@ def create_approval_proposal(token_contract: str, amount: float, to: str, descri
     proposal_details[p_id, "token_contract"] = token_contract
     proposal_details[p_id, "amount"] = amount
     proposal_details[p_id, "reciever"] = to
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "approval"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def vote(p_id: int, result: bool): #Vote here
@@ -106,11 +100,8 @@ def change_approval_percentage(new_percentage: float, description: str, voting_t
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "amount"] = new_percentage
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "change_approval_percentage"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def create_signalling_vote(action: str, description: str, voting_time_in_days: int):
@@ -119,11 +110,8 @@ def create_signalling_vote(action: str, description: str, voting_time_in_days: i
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "action"] = action
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "create_signalling_vote"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def change_minimum_duration(new_minimum_amount: int, description: str, voting_time_in_days: int):
@@ -132,11 +120,8 @@ def change_minimum_duration(new_minimum_amount: int, description: str, voting_ti
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "amount"] = new_minimum_amount
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "change_minimum_duration"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def change_active_contract(new_contract: str, description: str, voting_time_in_days: int):
@@ -144,11 +129,8 @@ def change_active_contract(new_contract: str, description: str, voting_time_in_d
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "contract"] = new_contract
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "change_active_contract"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def sign_custom_transaction(contract: str, function: str, kwargs: dict, description: str, voting_time_in_days: int): #For future extensibility. It is highly recommended that any contract put in the contract field has its owner set to the governance contract 
@@ -159,11 +141,8 @@ def sign_custom_transaction(contract: str, function: str, kwargs: dict, descript
     proposal_details[p_id, "contract"] = contract
     proposal_details[p_id, "function"] = function
     proposal_details[p_id, "kwargs"] = kwargs
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "sign_custom_transaction"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def create_mint_proposal(amount: float, to: str, description: str, voting_time_in_days: int): #Mint tokens. Warning: Dangerous, and can lead to the takeover of the SC
@@ -174,11 +153,8 @@ def create_mint_proposal(amount: float, to: str, description: str, voting_time_i
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "amount"] = amount
     proposal_details[p_id, "reciever"] = to
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "mint"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export
 def set_state(new_state: str, key: list, description: str, voting_time_in_days: int): #Set state here. For future extensibility
@@ -187,11 +163,8 @@ def set_state(new_state: str, key: list, description: str, voting_time_in_days: 
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "state"] = new_state
     proposal_details[p_id, "key"] = key
-    proposal_details[p_id, "proposal_creator"] = ctx.caller
-    proposal_details[p_id, "description"] = description
-    proposal_details[p_id, "time"] = now
     proposal_details[p_id, "type"] = "set_state"
-    proposal_details[p_id, "duration"] = voting_time_in_days
+    modify_proposal(p_id, description, voting_time_in_days)
     return p_id
 @export 
 def get_state(key: list): #Read state set by the set_state function. For future extensibility
@@ -201,12 +174,9 @@ def get_active_contract(): #Get current AMM contract here
     return active_contract.get()
 @export
 def proposal_result(): #Get proposal result bool here
-    for x in finished_proposals.get():
-        if x == p_id:
-            if status[p_id] != "":
-                return status[p_id]
-            return "undecided"
-    return "proposal not found"
+    if finished_proposals[p_id] != "":
+        return finished_proposals[p_id]
+    return ""
 @export 
 def proposal_information(p_id: int): #Get proposal information, provided as a dictionary
     info =	{
@@ -257,3 +227,8 @@ def transfer_from(amount: float, to: str, main_account: str):
 @export 
 def total_supply():
     return number_of_sig
+def modify_proposal(p_id: int, description: str, voting_time_in_days: int):
+    proposal_details[p_id, "proposal_creator"] = ctx.caller
+    proposal_details[p_id, "description"] = description
+    proposal_details[p_id, "time"] = now
+    proposal_details[p_id, "duration"] = voting_time_in_days
