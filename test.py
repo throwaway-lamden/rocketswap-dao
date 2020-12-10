@@ -12,17 +12,16 @@ with open('sc.py') as f:
     client.submit(code, name='sc')
 
 
-class MyTestCase(unittest.TestCase):
-    def setUp():
+class standardTests(unittest.TestCase):
+    def setUp(self):
         self.client = ContractingClient()
         self.client.flush()
         sc = client.get_contract("sc")
         currency = client.get_contract("currency")
         sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
         sc.transfer(amount=500000, to="wallet3", signer="wallet1")
-    def tearDown():
+    def tearDown(self):
         self.client.flush()
-    self.client.flush()
     def test_CAP_pass(self):
         sc.change_minimum_percentage(new_percentage=0.6, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         sc.vote(p_id="0", result=True, signer='wallet1')
@@ -59,13 +58,63 @@ class MyTestCase(unittest.TestCase):
         sc.vote(p_id="0", result=False, signer='wallet3')
         self.assertEqual(sc.determine_results(p_id=0), True)
         return_dict = sc.proposal_information(p_id=0, signer='wallet1')
-        self.assertEqual(return_dict["token_contract"], "do a test") 
+        self.assertEqual(return_dict["action"], "do a test") 
+    def test_CAV_pass(self):
+        sc.change_active_contract(contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        sc.vote(p_id="0", result=True, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet2')
+        sc.vote(p_id="0", result=False, signer='wallet3')
+        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertEqual(sc.quick_read("active_contract"), "contract") 
+    def test_CAC_pass(self):
+        sc.change_active_contract(contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        sc.vote(p_id="0", result=True, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet2')
+        sc.vote(p_id="0", result=False, signer='wallet3')
+        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertEqual(sc.quick_read("active_contract"), "contract") 
+    def test_CAP_2_pass(self):
+        sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        return_dict = sc.proposal_information(p_id=0, signer='wallet1')
+        self.assertEqual(return_dict["type"], "approval") 
+        sc.vote(p_id="0", result=True, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet2')
+        sc.vote(p_id="0", result=False, signer='wallet3')
+        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_CTP_fail(self):
         sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
-        print(sc.proposal_information(p_id=0, signer='wallet1'))
         sc.vote(p_id="0", result=True, signer='wallet1')
         sc.vote(p_id="0", result=False, signer='wallet2')
         sc.vote(p_id="0", result=False, signer='wallet3')
+        self.assertEqual(sc.determine_results(p_id=0), False)
+        self.assertEqual(currency.balance_of(account="wallet4"), 0)
+    def test_CTP_double_call_fail(self):
+        sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet2')
+        sc.vote(p_id="0", result=False, signer='wallet3')
+        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertRaises(AssertionError, sc.determine_results, 0)
+        self.assertEqual(currency.balance_of(account="wallet4"), 100)
+class quorumTests(unittest.TestCase):
+    def setUp(self):
+        self.client = ContractingClient()
+        self.client.flush()
+        sc = client.get_contract("sc")
+        currency = client.get_contract("currency")
+        sc.transfer(amount=9950000, to="sc", signer="wallet1")
+    def tearDown(self):
+        self.client.flush()
+    def test_quorum_pass(self):
+        sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet1')
+        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertEqual(currency.balance_of(account="wallet4"), 100)
+    def test_quorum_fail(self):
+        sc.transfer(amount=45000, to="wallet4", signer="wallet1")
+        sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
+        sc.vote(p_id="0", result=True, signer='wallet1')
         self.assertEqual(sc.determine_results(p_id=0), False)
         self.assertEqual(currency.balance_of(account="wallet4"), 0)
 if __name__ == '__main__':
