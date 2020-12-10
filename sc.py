@@ -19,10 +19,10 @@ misc = Hash()
 @construct
 def seed():
     supply = 10000000 #Set total supply
-    balances[ctx.caller] = supply #Change this to change initial distribution
+    balances["wallet1"] = supply #Change this to change initial distribution
     number_of_sig.set(supply) 
     proposal_id.set(0)
-    minimum_proposal_duration.set(1) #Number is in days
+    minimum_proposal_duration.set(0) #Number is in days
     required_approval_percentage.set(0.5) #Keep this at 50%, unless there are special circumstances
     minimum_quorum.set(0.01) #Set minimum amount of votes needed
     sign_transaction_contract.set() #This contract should have the governance contract set as owner. This does not need to be set at contract creation, but it is an option to allow future extensibility 
