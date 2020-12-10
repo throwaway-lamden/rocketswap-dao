@@ -7,7 +7,7 @@ number_of_sig = Variable()
 proposal_id = Variable()
 minimum_proposal_duration = Variable()
 required_approval_percentage = Variable()
-finished_proposals = Variable()
+finished_proposals = Hash()
 active_contract = Variable()
 minimum_quorum = Variable()
 sign_transaction_contract = Variable()
@@ -24,7 +24,6 @@ def seed():
     required_approval_percentage.set(0.5) #Keep this at 50%, unless there are special circumstances
     minimum_quorum.set(0.01) #Set minimum amount of votes needed
     sign_transaction_contract.set() #This contract should have the governance contract set as owner. This does not need to be set at contract creation, but it is an option to allow future extensibility 
-    finished_proposals.set([-1]) #Probably not needed
 @export
 def create_transfer_proposal(token_contract: str, amount: float, to: str, description: str, voting_time_in_days: int): #Transfer tokens held by the AMM treasury here
     assert voting_time_in_days >= minimum_proposal_duration.get()
@@ -63,11 +62,8 @@ def vote(p_id: int, result: bool): #Vote here
 @export
 def determine_results(p_id: int): #Vote resolution takes place here
     assert (proposal_details[p_id, "time"] + datetime.timedelta(days=1) * (proposal_details[p_id, "duration"])) <= now, "Proposal not over!" #Checks if proposal has concluded
-    proposals_finished = finished_proposals.get() 
-    for x in proposals_finished:
-        assert p_id != x #Checks that the proposal has not been resolved before (to prevent double spends)
-    proposals_finished.append(p_id) #Adds the proposal to the list of resolved proposals
-    finished_proposals.set(proposals_finished)
+    assert finished_proposals[p_id] is not True, "Proposal already resolved" #Checks that the proposal has not been resolved before (to prevent double spends)
+    finished_proposals[p_id] = True #Adds the proposal to the list of resolved proposals
     approvals = 0
     total_votes = 0
     for x in proposal_details[p_id, "voters"]:
