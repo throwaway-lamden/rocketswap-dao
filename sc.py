@@ -57,6 +57,7 @@ def vote(p_id: int, result: bool): #Vote here
 def determine_results(p_id: int): #Vote resolution takes place here
     assert (proposal_details[p_id, "time"] + datetime.timedelta(days=1) * (proposal_details[p_id, "duration"])) <= now, "Proposal not over!" #Checks if proposal has concluded
     assert finished_proposals[p_id] is not True, "Proposal already resolved" #Checks that the proposal has not been resolved before (to prevent double spends)
+    assert p_id < proposal_id.get()
     finished_proposals[p_id] = True #Adds the proposal to the list of resolved proposals
     approvals = 0
     total_votes = 0
@@ -106,7 +107,6 @@ def change_approval_percentage(new_percentage: float, description: str, voting_t
 @export
 def create_signalling_vote(action: str, description: str, voting_time_in_days: int):
     assert voting_time_in_days >= minimum_proposal_duration.get()
-    assert new_minimum_amount <= 365
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "action"] = action
