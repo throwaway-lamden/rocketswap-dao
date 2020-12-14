@@ -12,8 +12,8 @@ class standardTests(unittest.TestCase):
         with open('sc.py') as f:
             code = f.read()
             client.submit(code, name='sc')
-        sc = client.get_contract("sc")
-        currency = client.get_contract("currency")
+        self.sc = client.get_contract("sc")
+        self.currency = client.get_contract("currency")
         sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
         sc.transfer(amount=500000, to="wallet3", signer="wallet1")
     def teardown(self):
@@ -115,8 +115,8 @@ class quorumTests(unittest.TestCase):
         with open('sc.py') as f:
             code = f.read()
             client.submit(code, name='sc')
-        sc = client.get_contract("sc")
-        currency = client.get_contract("currency")
+        self.sc = client.get_contract("sc")
+        self.currency = client.get_contract("currency")
         sc.transfer(amount=9950000, to="sc", signer="wallet1")
     def tearDown(self):
         self.client.flush()
