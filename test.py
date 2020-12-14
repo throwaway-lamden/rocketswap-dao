@@ -14,8 +14,8 @@ class standardTests(unittest.TestCase):
             client.submit(code, name='sc')
         self.sc = client.get_contract("sc")
         self.currency = client.get_contract("currency")
-        sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
-        sc.transfer(amount=500000, to="wallet3", signer="wallet1")
+        self.sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
+        self.sc.transfer(amount=500000, to="wallet3", signer="wallet1")
     def teardown(self):
         self.client.flush()
     def test_CAP_pass(self):
