@@ -3,13 +3,15 @@
 #This code has not been audited. Proceed at your own risk
 sig = Hash(default_value=False)
 proposal_details = Hash()
-number_of_sig = Variable()
+total_supply = Variable()
 proposal_id = Variable()
 minimum_proposal_duration = Variable()
 required_approval_percentage = Variable()
 finished_proposals = Hash()
 active_contract = Variable()
 minimum_quorum = Variable()
+token_name = Variable()
+token_symbol = Variable()
 sign_transaction_contract = Variable()
 status = Hash()
 balances = Hash(default_value=0)
@@ -18,11 +20,13 @@ misc = Hash()
 def seed():
     supply = 10000000 #Set total supply
     balances["wallet1"] = supply #Change this to change initial distribution
-    number_of_sig.set(supply) 
+    total_supply.set(supply) 
     proposal_id.set(0)
     minimum_proposal_duration.set(0) #Number is in days
     required_approval_percentage.set(0.5) #Keep this at 50%, unless there are special circumstances
     minimum_quorum.set(0.01) #Set minimum amount of votes needed
+    token_name.set("Rocketswap") #Set token name
+    token_symbol.set("RKT") #Set token symbol
 @export
 def create_transfer_proposal(token_contract: str, amount: float, to: str, description: str, voting_time_in_days: int): #Transfer tokens held by the AMM treasury here
     assert voting_time_in_days >= minimum_proposal_duration.get()
@@ -64,7 +68,7 @@ def determine_results(p_id: int): #Vote resolution takes place here
         if sig[p_id, x] == True:
             approvals += balances[x]
         total_votes += balances[x]
-    quorum = number_of_sig.get() - balances[ctx.this] 
+    quorum = total_supply.get() - balances[ctx.this] 
     if approvals < (quorum * minimum_quorum.get()): #Checks that the minimum approval percentage has been reached (quorum)
         return False
     if approvals / total_votes >= required_approval_percentage.get(): #Checks that the approval percentage of the votes has been reached (% of total votes)
@@ -85,7 +89,7 @@ def determine_results(p_id: int): #Vote resolution takes place here
             contract.run(proposal_details[p_id, "function"], proposal_details[p_id, "kwargs"])
         elif proposal_details[p_id, "type"] == "mint":
             balances[proposal_details[p_id, "reciever"]] += proposal_details[p_id, "amount"]
-            number_of_sig.set(number_of_sig.get() + proposal_details[p_id, "amount"])
+            total_supply.set(total_supply.get() + proposal_details[p_id, "amount"])
         elif proposal_details[p_id, "type"] == "set_state":
             misc[proposal_details[p_id, "key"]] = proposal_details[p_id, "new_state"]
         status[p_id] = True
@@ -224,8 +228,14 @@ def transfer_from(amount: float, to: str, main_account: str):
     balances[main_account] -= amount
     balances[to] += amount
 @export 
-def total_supply():
-    return number_of_sig
+def get_supply():
+    return total_supply
+@export
+def token_name():
+    return token_name.get()
+@export
+def token_symbol():
+    return token_symbol.get()
 def modify_proposal(p_id: int, description: str, voting_time_in_days: int):
     proposal_details[p_id, "proposal_creator"] = ctx.caller
     proposal_details[p_id, "description"] = description
