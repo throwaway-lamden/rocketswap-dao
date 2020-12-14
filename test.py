@@ -99,9 +99,9 @@ class standardTests(unittest.TestCase):
             self.sc.vote(p_id=x, result=True, signer='wallet4')
             self.assertEqual(self.sc.determine_results(p_id=x), False)
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
-        self.sc.vote(p_id=0, result=True, signer='wallet1')
-        self.sc.vote(p_id=0, result=True, signer='wallet2')
-        self.sc.vote(p_id=0, result=False, signer='wallet3')
+        self.sc.vote(p_id=100, result=True, signer='wallet1')
+        self.sc.vote(p_id=100, result=True, signer='wallet2')
+        self.sc.vote(p_id=100, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=100), True)
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_11_no_vote(self):
