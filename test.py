@@ -104,7 +104,7 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_11_no_vote(self):
-        self.assertRaises(AssertionError, self.sc.determine_results, 0)
+        self.assertRaises(AssertionError, self.sc.determine_results, p_id=0, signer="wallet1")
 class quorumTests(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
