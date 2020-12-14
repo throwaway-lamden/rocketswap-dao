@@ -41,7 +41,7 @@ class standardTests(unittest.TestCase):
     def test_03_CTP_pass_and_proposal_return(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         return_dict = self.sc.proposal_information(p_id=0, signer='wallet1')
-        self.assertEqual(return_dict["token_contract"], 0) 
+        self.assertEqual(return_dict["token_contract"], "currency") 
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
@@ -77,25 +77,25 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
-        self.assertEqual(currency.allowance(owner="sc", spender="wallet4"), 100)
+        self.assertEqual(self.currency.allowance(owner="sc", spender="wallet4"), 100)
     def test_08_CTP_fail(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=False, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), False)
-        self.assertEqual(currency.balance_of(account="wallet4"), 0)
+        self.assertEqual(self.currency.balance_of(account="wallet4"), 0)
     def test_09_CTP_double_call_fail(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
-        self.assertRaises(AssertionError, self.sc.determine_results, 0)
+        self.assertRaises(AssertionError, self.sc.determine_results, p_id=0, signer="wallet1")
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_10_CTP_DOS_attack(self):
         for x in range(1000):
-            c.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
+            sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
             self.assertEqual(self.sc.determine_results(p_id=x), False)
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
