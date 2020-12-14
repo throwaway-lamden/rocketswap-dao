@@ -60,7 +60,7 @@ class standardTests(unittest.TestCase):
             code = f.read()
             client.submit(code, name='custom_contract')
         custom_contract = client.get_contract("custom_contract")
-        self.sc.sign_custom_transaction(contract="custom_contract", function="set_var", kwargs=dict(value: "test message"), description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.sign_custom_transaction(contract="custom_contract", function="set_var", kwargs=dict(value = "test message"), description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
