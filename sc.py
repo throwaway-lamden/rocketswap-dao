@@ -150,7 +150,7 @@ def sign_custom_transaction(contract: str, function: str, kwargs: dict, descript
 @export
 def create_mint_proposal(amount: float, to: str, description: str, voting_time_in_days: int): #Mint tokens. Warning: Dangerous, and can lead to the takeover of the SC
     assert voting_time_in_days >= minimum_proposal_duration.get()
-    assert voting_time_in_days > 0, "Minting has a set minimum length of 7 days" #Set hardcoded minimum duration here
+    assert voting_time_in_days >= 0, "Minting has a set minimum length of 7 days" #Set hardcoded minimum duration here
     assert amount > 0
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
