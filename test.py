@@ -5,7 +5,6 @@ client = ContractingClient()
 with open('currency.py') as f:
     code = f.read()
     client.submit(code, name='currency')
-currency = client.get_contract("currency")
 
 with open('sc.py') as f:
     code = f.read()
