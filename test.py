@@ -60,7 +60,7 @@ class standardTests(unittest.TestCase):
             code = f.read()
             client.submit(code, name='custom_contract')
         custom_contract = client.get_contract("custom_contract")
-        self.sc.sign_custom_transaction(contract="custom_contract", function="set_var", kwargs="test message", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.sign_custom_transaction(contract="custom_contract", function="set_var", kwargs=dict(value: "test message"), description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
@@ -157,5 +157,17 @@ class quorumTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.assertEqual(self.sc.determine_results(p_id=0), False)
         self.assertEqual(self.currency.balance_of(account="wallet4"), 0)
+class customContractTests(unittest.TestCase):
+    def setUp(self):
+        self.client = ContractingClient()
+        self.client.flush()
+        with open('custom_contract.py') as f:
+            code = f.read()
+            client.submit(code, name='custom_contract')
+        self.currency = client.get_contract("custom_contract")
+    def tearDown(self):
+        self.client.flush()
+    def test_16(self):
+        pass
 if __name__ == '__main__':
     unittest.main()
