@@ -90,7 +90,7 @@ def determine_results(p_id: int): #Vote resolution takes place here
         elif proposal_details[p_id, "type"] == "mint":
             balances[proposal_details[p_id, "reciever"]] += proposal_details[p_id, "amount"]
             total_supply.set(total_supply.get() + proposal_details[p_id, "amount"])
-        elif proposal_details[p_id, "type"] == "state":
+        elif proposal_details[p_id, "type"] == "set_state":
             misc[proposal_details[p_id, "key"]] = proposal_details[p_id, "new_state"]
         status[p_id] = True
         return True
