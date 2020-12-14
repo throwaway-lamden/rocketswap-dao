@@ -138,7 +138,6 @@ def change_active_contract(new_contract: str, description: str, voting_time_in_d
 @export
 def sign_custom_transaction(contract: str, function: str, kwargs: dict, description: str, voting_time_in_days: int): #For future extensibility. It is highly recommended that any contract put in the contract field has its owner set to the governance contract 
     assert voting_time_in_days >= minimum_proposal_duration.get()
-    assert new_minimum_amount <= 365
     p_id = proposal_id.get()
     proposal_id.set(p_id + 1)
     proposal_details[p_id, "contract"] = contract
