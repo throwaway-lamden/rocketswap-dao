@@ -55,13 +55,17 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         return_dict = self.sc.proposal_information(p_id=0, signer='wallet1')
         self.assertEqual(return_dict["action"], "do a test") 
-    def test_05_CAV_pass(self): #DUPLICATE
-        self.sc.change_active_contract(new_contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+    def test_05_SCT_pass(self): 
+        with open('custom_contract.py') as f:
+            code = f.read()
+            client.submit(code, name='custom_contract')
+        custom_contract = client.get_contract("custom_contract")
+        self.sc.sign_custom_transaction(contract="custom_contract", function="set", kwargs="test message", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
-        self.assertEqual(self.sc.quick_read("active_contract"), "contract") 
+        self.assertEqual(custom_contract.quick_read("state"), "test message") 
     def test_06_CAC_pass(self): 
         self.sc.change_active_contract(new_contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
