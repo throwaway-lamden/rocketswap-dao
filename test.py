@@ -19,6 +19,7 @@ class standardTests(unittest.TestCase):
     def tearDown(self):
         self.client.flush()
     def test_CAP_pass(self):
+        self.client.flush()
         with open('currency.py') as f:
             code = f.read()
             client.submit(code, name='currency')
