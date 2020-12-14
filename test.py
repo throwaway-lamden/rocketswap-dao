@@ -96,8 +96,7 @@ class standardTests(unittest.TestCase):
     def test_10_CTP_DOS_attack(self):
         for x in range(1000):
             self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
-            self.sc.vote(p_id=0, result=True, signer='wallet4')
-            self.sc.vote(p_id=0, result=False, signer='wallet1')
+            self.sc.vote(p_id=x, result=True, signer='wallet4')
             self.assertEqual(self.sc.determine_results(p_id=x), False)
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
