@@ -2,19 +2,16 @@ import unittest
 from contracting.client import ContractingClient
 client = ContractingClient()
 
-with open('currency.py') as f:
-    code = f.read()
-    client.submit(code, name='currency')
-
-with open('sc.py') as f:
-    code = f.read()
-    client.submit(code, name='sc')
-
-
 class standardTests(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
         self.client.flush()
+        with open('currency.py') as f:
+            code = f.read()
+            client.submit(code, name='currency')
+        with open('sc.py') as f:
+            code = f.read()
+            client.submit(code, name='sc')
         sc = client.get_contract("sc")
         currency = client.get_contract("currency")
         sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
