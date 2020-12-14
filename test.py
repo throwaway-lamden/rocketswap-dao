@@ -109,6 +109,12 @@ class quorumTests(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
         self.client.flush()
+        with open('currency.py') as f:
+            code = f.read()
+            client.submit(code, name='currency')
+        with open('sc.py') as f:
+            code = f.read()
+            client.submit(code, name='sc')
         sc = client.get_contract("sc")
         currency = client.get_contract("currency")
         sc.transfer(amount=9950000, to="sc", signer="wallet1")
