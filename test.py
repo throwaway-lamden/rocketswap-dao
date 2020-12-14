@@ -19,6 +19,18 @@ class standardTests(unittest.TestCase):
     def tearDown(self):
         self.client.flush()
     def test_CAP_pass(self):
+        self.client = ContractingClient()
+        self.client.flush()
+        with open('currency.py') as f:
+            code = f.read()
+            client.submit(code, name='currency')
+        with open('sc.py') as f:
+            code = f.read()
+            client.submit(code, name='sc')
+        sc = client.get_contract("sc")
+        currency = client.get_contract("currency")
+        sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
+        sc.transfer(amount=500000, to="wallet3", signer="wallet1")
         sc.change_minimum_percentage(new_percentage=0.6, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         sc.vote(p_id=0, result=True, signer='wallet1')
         sc.vote(p_id=0, result=True, signer='wallet2')
