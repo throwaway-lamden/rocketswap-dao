@@ -18,7 +18,7 @@ class standardTests(unittest.TestCase):
         self.sc.transfer(amount=500000, to="wallet3", signer="wallet1")
     def tearDown(self):
         self.client.flush()
-    def test_1_CAP_pass(self):
+    def test_01_CAP_pass(self):
         self.sc.change_approval_percentage(new_percentage=0.6, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
@@ -31,14 +31,14 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=1, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read('required_approval_percentage'), 0.3)
-    def test_2_CMD_pass(self):
+    def test_02_CMD_pass(self):
         self.sc.change_minimum_duration(new_minimum_amount=300, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read('minimum_proposal_duration'), 300)
-    def test_3_CTP_pass_and_proposal_return(self):
+    def test_03_CTP_pass_and_proposal_return(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         return_dict = self.sc.proposal_information(p_id=0, signer='wallet1')
         self.assertEqual(return_dict["token_contract"], 0) 
@@ -47,7 +47,7 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
-    def test_4_CSV_pass(self):
+    def test_04_CSV_pass(self):
         self.sc.create_signalling_vote(action="do a test", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
@@ -55,21 +55,21 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         return_dict = self.sc.proposal_information(p_id=0, signer='wallet1')
         self.assertEqual(return_dict["action"], "do a test") 
-    def test_5_CAV_pass(self):
+    def test_05_CAV_pass(self):
         self.sc.change_active_contract(contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read("active_contract"), "contract") 
-    def test_6_CAC_pass(self):
+    def test_06_CAC_pass(self):
         self.sc.change_active_contract(contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read("active_contract"), "contract") 
-    def test_7_CAP_2_pass(self):
+    def test_07_CAP_2_pass(self):
         self.sc.create_approval_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         return_dict = self.sc.proposal_information(p_id=0, signer='wallet1')
         self.assertEqual(return_dict["type"], "approval") 
@@ -78,14 +78,14 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(currency.allowance(owner="sc", spender="wallet4"), 100)
-    def test_8_CTP_fail(self):
+    def test_08_CTP_fail(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=False, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), False)
         self.assertEqual(currency.balance_of(account="wallet4"), 0)
-    def test_9_CTP_double_call_fail(self):
+    def test_09_CTP_double_call_fail(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
