@@ -25,7 +25,7 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read('required_approval_percentage'), 0.6)
-        self.sc.change_minimum_percentage(new_percentage=0.3, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.change_approval_percentage(new_percentage=0.3, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=1, result=True, signer='wallet1')
         self.sc.vote(p_id=1, result=True, signer='wallet2')
         self.sc.vote(p_id=1, result=False, signer='wallet3')
@@ -63,7 +63,7 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.sc.quick_read("active_contract"), "contract") 
     def test_06_CAC_pass(self):
-        self.sc.change_active_contract(contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.change_active_contract(new_contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
@@ -124,13 +124,13 @@ class quorumTests(unittest.TestCase):
     def test_12_quorum_pass(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
-        self.assertEqual(sc.determine_results(p_id=0), True)
+        self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.currency.balance_of(account="wallet4"), 100)
     def test_13_quorum_fail(self):
         self.sc.transfer(amount=45000, to="wallet4", signer="wallet1")
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
-        self.assertEqual(sc.determine_results(p_id=0), False)
+        self.assertEqual(self.sc.determine_results(p_id=0), False)
         self.assertEqual(self.currency.balance_of(account="wallet4"), 0)
 if __name__ == '__main__':
     unittest.main()
