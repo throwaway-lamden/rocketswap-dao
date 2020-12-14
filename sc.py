@@ -1,6 +1,6 @@
-#AMM GOVERNANCE CONTRACT v0.1.2 WITH INTEGRATED TOKEN
-#No tests have been run, so do not deploy this in production at this time
-#This code has not been audited. Proceed at your own risk
+#AMM GOVERNANCE CONTRACT v0.1.3 WITH INTEGRATED TOKEN
+#Basic tests have been completed, and this SC should be fully functional. However, no edge case tests have been completed, so DEPLOY AT YOUR OWN RISK
+#This code has not been audited. Please take your own look at the code, and check it for bugs
 sig = Hash(default_value=False)
 proposal_details = Hash()
 total_supply = Variable()
