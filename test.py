@@ -127,7 +127,7 @@ class quorumTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.currency.balance_of(account="wallet4"), 100)
     def test_13_quorum_fail(self):
-        self.sc.transfer(amount=49000, to="wallet4", signer="wallet1")
+        self.sc.transfer(amount=49900, to="wallet4", signer="wallet1")
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.assertEqual(self.sc.determine_results(p_id=0), False)
