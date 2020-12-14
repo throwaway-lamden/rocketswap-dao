@@ -95,7 +95,7 @@ class standardTests(unittest.TestCase):
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_10_CTP_DOS_attack(self):
         for x in range(1000):
-            sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
+            self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
             self.assertEqual(self.sc.determine_results(p_id=x), False)
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
@@ -104,7 +104,7 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(currency.balance_of(account="wallet4"), 100)
     def test_11_no_vote(self):
-        self.assertRaises(AssertionError, self.sc.determine_results, p_id=0, signer="wallet1")
+        self.assertRaises(TypeError, self.sc.determine_results, p_id=0, signer="wallet1")
 class quorumTests(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
