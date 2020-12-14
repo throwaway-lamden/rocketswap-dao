@@ -3,7 +3,7 @@ from contracting.client import ContractingClient
 client = ContractingClient()
 
 class standardTests(unittest.TestCase):
-    def setup(self):
+    def setUp(self):
         self.client = ContractingClient()
         self.client.flush()
         with open('currency.py') as f:
@@ -16,7 +16,7 @@ class standardTests(unittest.TestCase):
         self.currency = client.get_contract("currency")
         self.sc.transfer(amount=4750000, to="wallet2", signer="wallet1")
         self.sc.transfer(amount=500000, to="wallet3", signer="wallet1")
-    def teardown(self):
+    def tearDown(self):
         self.client.flush()
     def test_CAP_pass(self):
         self.sc.change_minimum_percentage(new_percentage=0.6, description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
