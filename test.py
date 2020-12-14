@@ -1,5 +1,4 @@
 import unittest
-import json
 from contracting.client import ContractingClient
 client = ContractingClient()
 
@@ -66,8 +65,7 @@ class standardTests(unittest.TestCase):
         self.sc.vote(p_id=0, result=True, signer='wallet2')
         self.sc.vote(p_id=0, result=False, signer='wallet3')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
-        state = json.loads(custom_contract.quick_read("state"))
-        self.assertEqual(state["value"], "test message") 
+        self.assertEqual(custom_contract.quick_read("state")["value"], "test message") 
     def test_06_CAC_pass(self): 
         self.sc.change_active_contract(new_contract="contract", description="test transfer", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
         self.sc.vote(p_id=0, result=True, signer='wallet1')
