@@ -110,6 +110,27 @@ class standardTests(unittest.TestCase):
         self.assertEqual(self.currency.balance_of(account="wallet4"), 100)
     def test_11_no_vote(self):
         self.assertRaises(TypeError, self.sc.determine_results, p_id=0, signer="wallet1")
+    def test_12_set_state_pass(self):
+        self.sc.set_state(new_state="do a test", key=["key1","key2"], voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.vote(p_id=0, result=True, signer='wallet1')
+        self.sc.vote(p_id=0, result=True, signer='wallet2')
+        self.sc.vote(p_id=0, result=False, signer='wallet3')
+        self.assertEqual(self.sc.determine_results(p_id=0), True)
+        self.assertEqual(self.sc.get_state(key=["key1","key2"], signer='wallet1'), "do a test") 
+    def test_13_mint_pass(self):
+        self.sc.create_mint_proposal(amount=10000000, to="wallet4", voting_time_in_days=0, signer='wallet1') #perform one, or multiple actions
+        self.sc.vote(p_id=0, result=True, signer='wallet1')
+        self.sc.vote(p_id=0, result=True, signer='wallet2')
+        self.sc.vote(p_id=0, result=False, signer='wallet3')
+        self.assertEqual(self.sc.determine_results(p_id=0), True)
+        self.assertEqual(self.sc.quick_read("total_supply"), 20000000)
+        self.sc.create_mint_proposal(amount=10000000, to="wallet4", voting_time_in_days=0, signer='wallet4') #perform one, or multiple actions
+        self.sc.vote(p_id=1, result=False, signer='wallet1')
+        self.sc.vote(p_id=1, result=False, signer='wallet2')
+        self.sc.vote(p_id=1, result=False, signer='wallet3')
+        self.sc.vote(p_id=1, result=True, signer='wallet4')
+        self.assertEqual(self.sc.determine_results(p_id=1), True)
+        self.assertEqual(self.sc.quick_read("total_supply"), 30000000) 
 class quorumTests(unittest.TestCase):
     def setUp(self):
         self.client = ContractingClient()
@@ -125,12 +146,12 @@ class quorumTests(unittest.TestCase):
         self.sc.transfer(amount=9950000, to="sc", signer="wallet1")
     def tearDown(self):
         self.client.flush()
-    def test_12_quorum_pass(self):
+    def test_14_quorum_pass(self):
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
         self.assertEqual(self.sc.determine_results(p_id=0), True)
         self.assertEqual(self.currency.balance_of(account="wallet4"), 100)
-    def test_13_quorum_fail(self):
+    def test_15_quorum_fail(self):
         self.sc.transfer(amount=49900, to="wallet4", signer="wallet1")
         self.sc.create_transfer_proposal(token_contract="currency", amount=100, to="wallet4", description="test transfer", voting_time_in_days=0, signer='wallet1')
         self.sc.vote(p_id=0, result=True, signer='wallet1')
