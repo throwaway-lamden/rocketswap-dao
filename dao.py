@@ -3,6 +3,7 @@ assert False, 'Do not deploy!'
 # AMM GOVERNANCE CONTRACT v0.2.1
 # Basic tests have not been completed. DO NOT DEPLOY.
 # This code has not been audited.
+
 import rswp
 
 amm_token = rswp
@@ -11,7 +12,6 @@ proposal_details = Hash(default_value=0)
 total_supply = Variable()
 proposal_id = Variable()
 state = Hash(default_value=0)
-balances = Hash(default_value=0)
 
 @construct
 def seed():
@@ -20,7 +20,6 @@ def seed():
     state['start_time'] = now
     state['start_rate'] = 1
     
-    state['rate_of_increase'] = 1.0000000510010585 # 500% per year - rate is for vRSWP emission
     state['minimum_proposal_duration'] = 0 # Number is in days
     state['required_approval_percentage'] = 0.5 # Keep this at 50%, unless there are special circumstances
     state['minimum_quorum'] = 0.05 # Set minimum amount of votes needed
@@ -65,11 +64,7 @@ def vote(p_id: int, amount: float, decision: bool): #Vote here
         
     proposal_details[p_id, ctx.caller] += amount
     proposal_details[p_id, ctx.caller, "decision"] = decision
-    
-    token_amount = get_timestamp() ** state["rate_of_increase"]
-    proposal_details[p_id, ctx.caller, "issued_tokens"] += amount
-    balances[ctx.caller] += token_amount
-    
+        
     amm_token.transfer_from(to=ctx.this, amount=amount, main_account=ctx.caller)
     
 @export
@@ -85,11 +80,7 @@ def withdraw_vote(p_id: int): #Vote here
     
     proposal_details[p_id, ctx.caller] = 0
     proposal_details[p_id, ctx.caller, "decision"] = 0
-    
-    assert balances[ctx.caller] >= proposal_details[p_id, ctx.caller, "issued_tokens"], 'Not enough vTokens!' 
-    balances[ctx.caller] -= token_amount
-    proposal_details[p_id, ctx.caller, "issued_tokens"] = 0
-    
+        
     amm_token.transfer(to=ctx.caller, amount=amount)
     
 @export
@@ -101,7 +92,7 @@ def determine_results(p_id: int): #Vote resolution takes place here
     
     proposal_details[p_id, "resolved"] = True 
         
-    quorum = state['total_token_supply'] - amm_token.balance_of[ctx.this]
+    quorum = state['total_token_supply'] - amm_token.balance_of(ctx.this)
     for x in state['deductible_wallets']:
         quorum -= amm_token.balance_of(x)
         
@@ -146,51 +137,3 @@ def determine_results(p_id: int): #Vote resolution takes place here
 @export
 def proposal_result(p_id: int): #Get proposal result bool here
     return proposal_details[p_id, "result"]
-    
-######################################################### vTOKEN STUFF GOES HERE #########################################################
-    
-@export 
-def transfer(amount: float, to: str): #Basic token functionality starts here. This code is reasonably trustable
-    assert amount > 0, 'Cannot send negative balances!'
-    
-    sender = ctx.caller
-    
-    assert balances[sender] >= amount, 'Not enough coins to send!'
-    
-    balances[sender] -= amount
-    balances[to] += amount
-    
-@export
-def balance_of(account: str):
-    return balances[account]
-    
-@export
-def allowance(owner: str, spender: str):
-    return balances[owner, spender]
-    
-@export
-def approve(amount: float, to: str):
-    assert amount > 0, 'Cannot send negative balances!'
-    
-    sender = ctx.caller
-    balances[sender, to] += amount
-    
-    return balances[sender, to]
-    
-@export
-def transfer_from(amount: float, to: str, main_account: str):
-    assert amount > 0, 'Cannot send negative balances!'
-    
-    sender = ctx.caller
-    
-    assert balances[main_account, sender] >= amount, 'Not enough coins approved to send! You have {} and are trying to spend {}'\
-        .format(balances[main_account, sender], amount)
-    assert balances[main_account] >= amount, 'Not enough coins to send!'
-    
-    balances[main_account, sender] -= amount
-    balances[main_account] -= amount
-    balances[to] += amount
-    
-@export 
-def get_supply():
-    return total_supply
