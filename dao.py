@@ -32,7 +32,7 @@ def get_timestamp():
     return td.seconds
     
 @export
-def create_proposal(proposal_type: str, proposal_args: list, description: str, voting_time_in_days: int): #Transfer tokens held by the AMM treasury here
+def create_proposal(proposal_type: str, proposal_args: list, description: str, voting_time_in_days: int): # create any type of proposal here
     assert voting_time_in_days >= state['minimum_proposal_duration']
     
     p_id = proposal_id.get()
@@ -52,7 +52,7 @@ def create_proposal(proposal_type: str, proposal_args: list, description: str, v
     return p_id
 
 @export
-def vote(p_id: int, amount: float, decision: bool): #Vote here
+def vote(p_id: int, amount: float, decision: bool): # vote here
     assert type(decision) == bool, 'Not a bool!' # TODO: Check this works
     if proposal_details[p_id, ctx.caller, "decision"] != 0: # TODO: Check this works
         assert decision == proposal_details[p_id, ctx.caller, "decision"], 'Previous vote had different decision! Please withdraw previous vote before voting again'
@@ -65,7 +65,7 @@ def vote(p_id: int, amount: float, decision: bool): #Vote here
     amm_token.transfer_from(to=ctx.this, amount=amount, main_account=ctx.caller)
     
 @export
-def withdraw_vote(p_id: int): #Vote here
+def withdraw_vote(p_id: int): # withdraw vote here
     assert type(proposal_details[p_id, ctx.caller, "decision"]) == bool, 'Not a bool!' # TODO: Check this works
     
     proposal_details[p_id, "votes", proposal_details[p_id, ctx.caller, "decision"]] -= proposal_details[p_id, ctx.caller]
@@ -118,5 +118,5 @@ def determine_results(p_id: int): # Vote resolution takes place here
         return False
 
 @export
-def proposal_result(p_id: int): #Get proposal result bool here
-    return proposal_details[p_id, "result"]
+def proposal_result(p_id: int): # get proposal result bool and type of proposal here
+    return proposal_details[p_id, "result"], proposal_details[p_id, "type"]
