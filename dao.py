@@ -9,21 +9,15 @@ import rswp
 amm_token = rswp
 
 proposal_details = Hash(default_value=0)
-total_supply = Variable()
 proposal_id = Variable()
 state = Hash(default_value=0)
 
 @construct
 def seed():
-    total_supply.set(0) 
     proposal_id.set(0)
-    state['start_time'] = now
-    state['start_rate'] = 1
-    
     state['minimum_proposal_duration'] = 1 # Number is in days
     state['required_approval_percentage'] = 0.5 # Keep this at 50%, unless there are special circumstances
     state['minimum_quorum'] = 0.05 # Set minimum amount of votes needed
-
     state['total_token_supply'] = 120000000 # Placeholder value, please double check before deployment
     
 @export # this can be made not a public function
