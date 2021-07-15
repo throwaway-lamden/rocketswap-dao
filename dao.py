@@ -46,14 +46,12 @@ def create_proposal(proposal_type: str, proposal_args: list, description: str, v
     return p_id
 
 @export
-def vote(p_id: int, decision: bool): # vote here
+def vote(p_id: int, amount: float, decision: bool): # vote here
     assert type(decision) == bool, 'Not a bool!' # TODO: Check this works
     
     if proposal_details[p_id, ctx.caller, "decision"] != 0: # TODO: Check this works
-        assert False, 'you have already voted! please withdraw the previous vote before voting again'
-        
-    amount = amm_token.balance_of(account=ctx.caller)
-    
+        assert decision == proposal_details[p_id, ctx.caller, "decision"], 'Your previous vote was different from this vote. Please withdraw that vote before voting again'
+            
     proposal_details[p_id, "votes", decision] += amount
         
     proposal_details[p_id, ctx.caller] += amount
@@ -79,7 +77,7 @@ def determine_results(p_id: int): # Vote resolution takes place here
     assert (proposal_details[p_id, "time"] + datetime.timedelta(days=1) * (proposal_details[p_id, "duration"])) <= now, "Proposal not over!" # Checks if proposal has concluded - TODO: Make sure this works
     assert proposal_details[p_id, "resolved"] is not True, "Proposal already resolved" # Checks that the proposal has not been resolved before - can be replaced with `is False`
     
-    assert p_id < proposal_id.get() # Checks proposal exists
+    assert p_id < proposal_id.get(), 'Proposal does not exist!' # Checks proposal exists
     
     proposal_details[p_id, "resolved"] = True 
         
