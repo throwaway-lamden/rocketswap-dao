@@ -46,11 +46,14 @@ def create_proposal(proposal_type: str, proposal_args: list, description: str, v
     return p_id
 
 @export
-def vote(p_id: int, amount: float, decision: bool): # vote here
+def vote(p_id: int, decision: bool): # vote here
     assert type(decision) == bool, 'Not a bool!' # TODO: Check this works
+    
     if proposal_details[p_id, ctx.caller, "decision"] != 0: # TODO: Check this works
-        assert decision == proposal_details[p_id, ctx.caller, "decision"], 'you have already voted! please withdraw the previous vote before voting again'
+        assert False, 'you have already voted! please withdraw the previous vote before voting again'
         
+    amount = amm_token.balance_of(account=ctx.caller)
+    
     proposal_details[p_id, "votes", decision] += amount
         
     proposal_details[p_id, ctx.caller] += amount
