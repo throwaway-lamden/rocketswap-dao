@@ -1,6 +1,6 @@
 assert False, 'Do not deploy!'
 
-# AMM GOVERNANCE CONTRACT v0.2.1
+# AMM GOVERNANCE CONTRACT v0.3
 # Basic tests have not been completed. DO NOT DEPLOY.
 # This code has not been audited.
 
@@ -57,10 +57,7 @@ def vote(p_id: int, amount: float, decision: bool): #Vote here
     if proposal_details[p_id, ctx.caller, "decision"] != 0: # TODO: Check this works
         assert decision == proposal_details[p_id, ctx.caller, "decision"], 'Previous vote had different decision! Please withdraw previous vote before voting again'
         
-    if decision is True:
-        proposal_details[p_id, "votes", True] += amount
-    elif decision is False: # can replace with else
-        proposal_details[p_id, "votes", False] += amount
+    proposal_details[p_id, "votes", decision] += amount
         
     proposal_details[p_id, ctx.caller] += amount
     proposal_details[p_id, ctx.caller, "decision"] = decision
@@ -71,10 +68,7 @@ def vote(p_id: int, amount: float, decision: bool): #Vote here
 def withdraw_vote(p_id: int): #Vote here
     assert type(proposal_details[p_id, ctx.caller, "decision"]) == bool, 'Not a bool!' # TODO: Check this works
     
-    if proposal_details[p_id, ctx.caller, "decision"] is True:
-        proposal_details[p_id, "votes", True] -= proposal_details[p_id, ctx.caller]
-    elif proposal_details[p_id, ctx.caller, "decision"] is False: # can replace with else
-        proposal_details[p_id, "votes", False] -= proposal_details[p_id, ctx.caller]
+    proposal_details[p_id, "votes", proposal_details[p_id, ctx.caller, "decision"]] -= proposal_details[p_id, ctx.caller]
        
     amount = proposal_details[p_id, ctx.caller]
     
@@ -84,7 +78,7 @@ def withdraw_vote(p_id: int): #Vote here
     amm_token.transfer(to=ctx.caller, amount=amount)
     
 @export
-def determine_results(p_id: int): #Vote resolution takes place here
+def determine_results(p_id: int): # Vote resolution takes place here
     assert (proposal_details[p_id, "time"] + datetime.timedelta(days=1) * (proposal_details[p_id, "duration"])) <= now, "Proposal not over!" # Checks if proposal has concluded - TODO: Make sure this works
     assert proposal_details[p_id, "resolved"] is not True, "Proposal already resolved" # Checks that the proposal has not been resolved before - can be replaced with `is False`
     
@@ -99,27 +93,16 @@ def determine_results(p_id: int): #Vote resolution takes place here
     if proposal_details[p_id, "votes", True] / (proposal_details[p_id, "votes", True] + proposal_details[p_id, "votes", False]) > state['minimum_quorum'] and proposal_details[p_id, "votes", True] >= (quorum * state['minimum_quorum']): #Checks that the approval percentage of the votes has been reached (% of total votes)
         proposal_details[p_id, "result"] = True
         
-        if proposal_details[p_id, "type"] == "transfer": 
+        if proposal_details[p_id, "type"] == "transfer": # transfer token request
             t_c = importlib.import_module(proposal_details[p_id, "args"][0])
             t_c.transfer(amount=proposal_details[p_id, "args"][1], to=proposal_details[p_id, "args"][2])
             
-        elif proposal_details[p_id, "type"] == "approval":
+        elif proposal_details[p_id, "type"] == "approval": # approve token transfer request
             t_c = importlib.import_module(proposal_details[p_id, "args"][0])
             t_c.approve(amount=proposal_details[p_id, "args"][1], to=proposal_details[p_id, "args"][2])
             
-        elif proposal_details[p_id, "type"] == "sign_custom_transaction":
-            contract = importlib.import_module(proposal_details[p_id, "args"].pop(0))
-            contract.run(args=proposal_details[p_id, "args"])
-            
         elif proposal_details[p_id, "type"] == "set_internal_state": # Possible TODO: Move this to a seperate proposal type
-            if proposal_details[p_id, "args"][0] == "rate_of_increase":
-                state['start_rate'] = state['start_rate'] ** state['rate_of_increase']
-                state['start_time'] = now
-                
-                state['rate_of_increase'] = proposal_details[p_id, "args"][1]
-                
-            else:
-                state[proposal_details[p_id, "args"][0]] = proposal_details[p_id, "args"][1]
+            state[proposal_details[p_id, "args"][0]] = proposal_details[p_id, "args"][1]
             
         elif proposal_details[p_id, "type"] == "set_external_state":
             contract = importlib.import_module(proposal_details[p_id, "args"][0])
