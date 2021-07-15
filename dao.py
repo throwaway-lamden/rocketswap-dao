@@ -4,17 +4,16 @@ assert False, 'Do not deploy!'
 # Basic tests have not been completed. DO NOT DEPLOY.
 # This code has not been audited.
 
-import rswp
-
-amm_token = rswp
-
-proposal_details = Hash(default_value=0)
 proposal_id = Variable()
+proposal_details = Hash(default_value=0)
 state = Hash(default_value=0)
 
 @construct
 def seed():
     proposal_id.set(0)
+    
+    state['voting_tokens'] = ['rswp', 'srswp']
+    
     state['minimum_proposal_duration'] = 1 # Number is in days
     state['required_approval_percentage'] = 0.5 # Keep this at 50%, unless there are special circumstances
     state['minimum_quorum'] = 0.05 # Set minimum amount of votes needed
@@ -46,28 +45,41 @@ def create_proposal(proposal_type: str, proposal_args: list, description: str, v
     return p_id
 
 @export
-def vote(p_id: int, amount: float, decision: bool): # vote here
+def vote(p_id: int, token_type: int, amount: float, decision: bool): # vote here
     assert type(decision) == bool, 'Not a bool!' # TODO: Check this works
+    token = importlib.import_module(state['voting_tokens'][token_type])
     
     if proposal_details[p_id, ctx.caller, "decision"] != 0: # TODO: Check this works
         assert decision == proposal_details[p_id, ctx.caller, "decision"], 'Your previous vote was different from this vote. Please withdraw that vote before voting again'
             
     proposal_details[p_id, "votes", decision] += amount
         
-    proposal_details[p_id, ctx.caller] += amount
+    # proposal_details[p_id, ctx.caller] += amount 
+    proposal_details[p_id, ctx.caller, state['voting_tokens'][token_type]] += amount
     proposal_details[p_id, ctx.caller, "decision"] = decision
         
-    amm_token.transfer_from(to=ctx.this, amount=amount, main_account=ctx.caller)
+    if type(proposal_details[p_id, ctx.caller, 'voting_tokens']) != list:
+        proposal_details[p_id, ctx.caller, 'voting_tokens'] = [state['voting_tokens'][token_type]]
+    elif state['voting_tokens'][token_type] not in proposal_details[p_id, ctx.caller, 'voting_tokens']:
+        proposal_details[p_id, ctx.caller, 'voting_tokens'].append(state['voting_tokens'][token_type])
+        
+    token.transfer_from(to=ctx.this, amount=amount, main_account=ctx.caller)
     
 @export
 def withdraw_vote(p_id: int): # withdraw vote here
     assert type(proposal_details[p_id, ctx.caller, "decision"]) == bool, 'Not a bool!' # TODO: Check this works
     
+    
     proposal_details[p_id, "votes", proposal_details[p_id, ctx.caller, "decision"]] -= proposal_details[p_id, ctx.caller]
        
     amount = proposal_details[p_id, ctx.caller]
     
-    proposal_details[p_id, ctx.caller] = 0
+    # proposal_details[p_id, ctx.caller] = 0
+    while proposal_details[p_id, ctx.caller, 'voting_tokens']:
+        token = proposal_details[p_id, ctx.caller, 'voting_tokens'].pop()
+        token = importlib.import_module(state['voting_tokens'][token])
+        
+    proposal_details[p_id, ctx.caller, state['voting_tokens'][token_type]] -= amount
     proposal_details[p_id, ctx.caller, "decision"] = 0
         
     amm_token.transfer(to=ctx.caller, amount=amount)
@@ -81,9 +93,9 @@ def determine_results(p_id: int): # Vote resolution takes place here
     
     proposal_details[p_id, "resolved"] = True 
         
-    quorum = state['total_token_supply'] - amm_token.balance_of(ctx.this)
-    for x in state['deductible_wallets']:
-        quorum -= amm_token.balance_of(x)
+    quorum = state['total_token_supply'] - amm_token.balance_of(account=ctx.this)
+    for account in state['deductible_wallets']:
+        quorum -= amm_token.balance_of(account=account)
         
     if proposal_details[p_id, "votes", True] / (proposal_details[p_id, "votes", True] + proposal_details[p_id, "votes", False]) > state['minimum_quorum'] and proposal_details[p_id, "votes", True] >= (quorum * state['minimum_quorum']): #Checks that the approval percentage of the votes has been reached (% of total votes)
         proposal_details[p_id, "result"] = True
