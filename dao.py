@@ -81,7 +81,7 @@ def determine_results(p_id: int): # Vote resolution takes place here
     
     proposal_details[p_id, "resolved"] = True 
         
-    quorum = state['total_token_supply'] - amm_token.balance_of(ctx.this)
+    quorum = state['total_token_supply']
     for x in state['deductible_wallets']:
         quorum -= amm_token.balance_of(x)
         
