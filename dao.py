@@ -20,7 +20,7 @@ def seed():
     state['start_time'] = now
     state['start_rate'] = 1
     
-    state['minimum_proposal_duration'] = 0 # Number is in days
+    state['minimum_proposal_duration'] = 1 # Number is in days
     state['required_approval_percentage'] = 0.5 # Keep this at 50%, unless there are special circumstances
     state['minimum_quorum'] = 0.05 # Set minimum amount of votes needed
 
